@@ -5,6 +5,7 @@
  */
 package dk.reciplist.messaging;
 
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -23,7 +24,7 @@ public class Send
     
     private static final String EXCHANGE_NAME = "direct_logs";
     
-    public static void sendMessage(String message, List<String> banks) throws IOException 
+    public static void sendMessage(String message, List<String> banks, AMQP.BasicProperties props) throws IOException 
     {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("datdb.cphbusiness.dk");
@@ -57,7 +58,7 @@ public class Send
                 type = "error";
         }
         
-        channel.basicPublish(EXCHANGE_NAME, type , null, message.getBytes());
+        channel.basicPublish(EXCHANGE_NAME, type , props, message.getBytes());
         
         System.out.println(" [x] Sent '" + type + "':'" + message + "'");
         

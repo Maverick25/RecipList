@@ -6,6 +6,7 @@
 package dk.reciplist.controller;
 
 import com.google.gson.Gson;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import dk.reciplist.dto.ComplexMessageDTO;
@@ -43,23 +44,24 @@ public class ContactSelectedBanks
         {
           QueueingConsumer.Delivery delivery = consumer.nextDelivery();
           String message = new String(delivery.getBody());
-          
+          AMQP.BasicProperties props = delivery.getProperties();
+          AMQP.BasicProperties replyProps = new AMQP.BasicProperties.Builder().correlationId(props.getCorrelationId()).build();
           messageDTO = gson.fromJson(message, ComplexMessageDTO.class);
           
           loanRequestDTO = messageDTO.getDto();
           selectedBanks = messageDTO.getBanks();
           
-          sendMessage(loanRequestDTO,selectedBanks);
+          sendMessage(loanRequestDTO,selectedBanks, replyProps);
 
           channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         }
         
     }
     
-    public static void sendMessage(LoanRequestDTO dto,List<String> banks) throws IOException
+    public static void sendMessage(LoanRequestDTO dto,List<String> banks, AMQP.BasicProperties props) throws IOException
     {
         String message = gson.toJson(dto);
         
-        Send.sendMessage(message,banks);
+        Send.sendMessage(message,banks, props);
     }   
 }
