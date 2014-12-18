@@ -35,7 +35,28 @@ public class Send
         
         channel.exchangeDeclare(EXCHANGE_NAME, "direct");
         
-        String type = "medium";
+        String type;
+        
+        switch(banks.size())
+        {
+            case 4:
+                type = "high";
+                break;
+            case 3:
+                type = "medium";
+                break;
+            case 2:
+                type = "low";
+                break;
+            case 1:
+                type = "miserable";
+                break;
+            case 0:
+                type = "none";
+                break;
+            default:
+                type = "error";
+        }
         
         channel.basicPublish(EXCHANGE_NAME, type , null, message.getBytes());
         
@@ -47,7 +68,7 @@ public class Send
 //                MessageProperties.PERSISTENT_TEXT_PLAIN,
 //                message.getBytes());
         
-        channel.close();
-        connection.close();
+//        channel.close();
+//        connection.close();
     }
 }
